@@ -43,6 +43,8 @@ import static com.googlecode.aviator.asm.Opcodes.POP;
 import static com.googlecode.aviator.asm.Opcodes.PUTFIELD;
 import static com.googlecode.aviator.asm.Opcodes.RETURN;
 import static com.googlecode.aviator.asm.Opcodes.SWAP;
+
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -762,6 +764,12 @@ public class ASMCodeGenerator extends BaseEvalCodeGenerator {
 
     byte[] bytes = this.classWriter.toByteArray();
     try {
+
+      String path = this.classLoader.getResource("./").getPath();
+      FileOutputStream fout = new FileOutputStream(path + "/" + this.className + ".class");
+      fout.write(bytes);
+      fout.close();
+
       Class<?> defineClass =
           ClassDefiner.defineClass(this.className, Expression.class, bytes, this.classLoader);
       Constructor<?> constructor =

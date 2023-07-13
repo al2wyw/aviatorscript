@@ -11,6 +11,7 @@ import javax.script.ScriptException;
 import org.beetl.core.Configuration;
 import org.beetl.core.GroupTemplate;
 import org.beetl.core.resource.StringTemplateResourceLoader;
+import org.junit.Assert;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -24,6 +25,11 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelCompiler;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 @Warmup(iterations = 5, time = 10, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 10, timeUnit = TimeUnit.SECONDS)
@@ -33,9 +39,9 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @State(Scope.Benchmark)
 public class PerfBenchmark {
 
-  static class Data {
-    private String ikey;
-    private Integer ivalue;
+  public static class Data {
+    public String ikey;
+    public Integer ivalue;
 
     public Data(final String ikey, final int ivalue) {
       setIkey(ikey);
@@ -62,6 +68,8 @@ public class PerfBenchmark {
 
   private final Map<String, Object> paras = new HashMap<>();
 
+  private final EvaluationContext nh = new StandardEvaluationContext();
+
   private GroupTemplate gt;
 
   private Invocable arithInv;
@@ -76,6 +84,11 @@ public class PerfBenchmark {
   private Expression objectExpInterpret;
   private Expression condExpInterpret;
 
+  private org.springframework.expression.Expression arithExpSpelInterpret;
+  private org.springframework.expression.Expression arithExpSpel;
+
+
+
   @Setup
   public void init() {
     this.paras.put("A", new Data("false", 23342423));
@@ -87,6 +100,7 @@ public class PerfBenchmark {
     initBeetl();
     initAviator();
     initAviatorInterpreterMode();
+    initSpel();
   }
 
   @Benchmark
@@ -189,6 +203,16 @@ public class PerfBenchmark {
     Object result = this.condExp.execute(this.paras);
   }
 
+  @Benchmark
+  public void testArithBySpelInterpretMode() {
+    Object result = this.arithExpSpelInterpret.getValue(nh);
+  }
+
+  @Benchmark
+  public void testArithBySpel() {
+    Object result = this.arithExpSpel.getValue(nh);
+  }
+
   private void initScript() {
     ScriptEngineManager manager = new ScriptEngineManager();
     try {
@@ -240,6 +264,17 @@ public class PerfBenchmark {
     this.condExpInterpret = instance.compile(
         "if(A.ikey=='true'){return A.ivalue;}elsif(B.ikey=='true'){return B.ivalue;}elsif(C.ikey=='true'){return C.ivalue;}elsif(D.ikey=='true'){return D.ivalue;}else{return 0;}");
     System.out.println("Aviator 解释器模式准备工作就绪！");
+  }
+
+  private void initSpel() {
+    ExpressionParser parser = new SpelExpressionParser();
+    arithExpSpelInterpret = parser.parseExpression("(#A.ivalue+#B.ivalue-#C.ivalue)*#D.ivalue");
+    System.out.println("Spel 解释器模式准备工作就绪！");
+
+    arithExpSpel = parser.parseExpression("(#A.ivalue+#B.ivalue-#C.ivalue)*#D.ivalue");
+    this.arithExpSpel.getValue(nh);
+    Assert.assertTrue(SpelCompiler.compile(arithExpSpel));
+    System.out.println("Spel ASM 模式准备工作就绪！");
   }
 
   public static void main(final String[] args) throws Exception {
