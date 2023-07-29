@@ -3,6 +3,7 @@ package com.googlecode.aviator;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -267,6 +268,10 @@ public class PerfBenchmark {
   }
 
   private void initSpel() {
+    for (Entry<String, Object> entry : this.paras.entrySet()) {
+      nh.setVariable(entry.getKey(), entry.getValue());
+    }
+
     ExpressionParser parser = new SpelExpressionParser();
     arithExpSpelInterpret = parser.parseExpression("(#A.ivalue+#B.ivalue-#C.ivalue)*#D.ivalue");
     System.out.println("Spel 解释器模式准备工作就绪！");
