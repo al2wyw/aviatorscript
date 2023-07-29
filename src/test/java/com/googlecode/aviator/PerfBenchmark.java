@@ -32,6 +32,28 @@ import org.springframework.expression.spel.standard.SpelCompiler;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+/**
+ * Benchmark                                        Mode  Cnt      Score     Error   Units
+ * PerfBenchmark.testArith                         thrpt    5  78020.709 ± 688.638  ops/ms
+ * PerfBenchmark.testArithByAviator                thrpt    5   1815.243 ±  22.148  ops/ms
+ * PerfBenchmark.testArithByAviatorInterpretMode   thrpt    5   1253.947 ±   7.408  ops/ms
+ * PerfBenchmark.testArithByBeetl                  thrpt    5   3081.299 ±  36.599  ops/ms
+ * PerfBenchmark.testArithByScript                 thrpt    5   6117.984 ± 237.483  ops/ms
+ * PerfBenchmark.testArithBySpel                   thrpt    5  47795.557 ± 800.126  ops/ms
+ * PerfBenchmark.testArithBySpelInterpretMode      thrpt    5    633.445 ±  46.634  ops/ms
+ * PerfBenchmark.testCond                          thrpt    5  65466.293 ± 622.039  ops/ms
+ * PerfBenchmark.testCondByAviator                 thrpt    5   1216.847 ±  12.346  ops/ms
+ * PerfBenchmark.testCondByAviatorInterpretMode    thrpt    5    584.566 ±   5.683  ops/ms
+ * PerfBenchmark.testCondByBeetl                   thrpt    5   2826.764 ±  26.029  ops/ms
+ * PerfBenchmark.testCondByScript                  thrpt    5   6044.490 ±  36.924  ops/ms
+ * PerfBenchmark.testObject                        thrpt    5   6635.216 ± 125.474  ops/ms
+ * PerfBenchmark.testObjectByAviator               thrpt    5    843.353 ±  20.206  ops/ms
+ * PerfBenchmark.testObjectByAviatorInterpretMode  thrpt    5    535.820 ±  10.644  ops/ms
+ * PerfBenchmark.testObjectByBeetl                 thrpt    5   1844.948 ± 116.365  ops/ms
+ * PerfBenchmark.testObjectByScript                thrpt    5   4228.086 ± 300.960  ops/ms
+ *
+ * 2.6 GHz 六核Intel Core i7
+ * */
 @Warmup(iterations = 5, time = 10, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 10, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
