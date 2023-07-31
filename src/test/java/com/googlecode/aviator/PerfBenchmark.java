@@ -13,6 +13,7 @@ import org.beetl.core.Configuration;
 import org.beetl.core.GroupTemplate;
 import org.beetl.core.resource.StringTemplateResourceLoader;
 import org.junit.Assert;
+import org.mvel2.MVEL;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -110,7 +111,9 @@ public class PerfBenchmark {
   private org.springframework.expression.Expression arithExpSpelInterpret;
   private org.springframework.expression.Expression arithExpSpel;
 
-
+  private Object arithExpMVEL;
+  private Object objectExpMVEL;
+  private Object condExpMVEL;
 
   @Setup
   public void init() {
@@ -124,6 +127,7 @@ public class PerfBenchmark {
     initAviator();
     initAviatorInterpreterMode();
     initSpel();
+    initMVEL();
   }
 
   @Benchmark
@@ -236,6 +240,21 @@ public class PerfBenchmark {
     Object result = this.arithExpSpel.getValue(nh);
   }
 
+  @Benchmark
+  public void testArithByMVEL() {
+    Object result = MVEL.executeExpression(this.arithExpMVEL, this.paras);
+  }
+
+  @Benchmark
+  public void testObjectByMVEL() {
+    Object result = MVEL.executeExpression(this.objectExpMVEL, this.paras);
+  }
+
+  @Benchmark
+  public void testCondByMVEL() {
+    Object result = MVEL.executeExpression(this.condExpMVEL, this.paras);
+  }
+
   private void initScript() {
     ScriptEngineManager manager = new ScriptEngineManager();
     try {
@@ -302,6 +321,12 @@ public class PerfBenchmark {
     this.arithExpSpel.getValue(nh);
     Assert.assertTrue(SpelCompiler.compile(arithExpSpel));
     System.out.println("Spel ASM 模式准备工作就绪！");
+  }
+
+  private void initMVEL() {
+    arithExpMVEL = MVEL.compileExpression("(A.ivalue+B.ivalue-C.ivalue)*D.ivalue");
+    objectExpMVEL = MVEL.compileExpression("object = ['f1': A.ivalue, 'f2': A.ivalue+B.ivalue, 'f3': C.ivalue, 'f4': (A.ivalue+B.ivalue-C.ivalue)*D.ivalue]; return object;");
+    condExpMVEL = MVEL.compileExpression("if(A.ikey=='true'){return A.ivalue;}else if(B.ikey=='true'){return B.ivalue;}else if(C.ikey=='true'){return C.ivalue;}else if(D.ikey=='true'){return D.ivalue;}else{return 0;}");
   }
 
   public static void main(final String[] args) throws Exception {
