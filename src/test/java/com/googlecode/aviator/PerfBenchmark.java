@@ -14,6 +14,7 @@ import org.beetl.core.GroupTemplate;
 import org.beetl.core.resource.StringTemplateResourceLoader;
 import org.junit.Assert;
 import org.mvel2.MVEL;
+import org.mvel2.ParserContext;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -114,6 +115,10 @@ public class PerfBenchmark {
   private Object arithExpMVEL;
   private Object objectExpMVEL;
   private Object condExpMVEL;
+
+  private Object arithExpMVELStrongType;
+  private Object objectExpMVELStrongType;
+  private Object condExpMVELStrongType;
 
   @Setup
   public void init() {
@@ -255,6 +260,21 @@ public class PerfBenchmark {
     Object result = MVEL.executeExpression(this.condExpMVEL, this.paras);
   }
 
+  @Benchmark
+  public void testArithByMVELStrongType() {
+    Object result = MVEL.executeExpression(this.arithExpMVELStrongType, this.paras);
+  }
+
+  @Benchmark
+  public void testObjectByMVELStrongType() {
+    Object result = MVEL.executeExpression(this.objectExpMVELStrongType, this.paras);
+  }
+
+  @Benchmark
+  public void testCondByMVELStrongType() {
+    Object result = MVEL.executeExpression(this.condExpMVELStrongType, this.paras);
+  }
+
   private void initScript() {
     ScriptEngineManager manager = new ScriptEngineManager();
     try {
@@ -323,10 +343,24 @@ public class PerfBenchmark {
     System.out.println("Spel ASM 模式准备工作就绪！");
   }
 
+  //-Dmvel2.advanced_debugging=true -Dmvel2.disable.jit=true
   private void initMVEL() {
     arithExpMVEL = MVEL.compileExpression("(A.ivalue+B.ivalue-C.ivalue)*D.ivalue");
     objectExpMVEL = MVEL.compileExpression("object = ['f1': A.ivalue, 'f2': A.ivalue+B.ivalue, 'f3': C.ivalue, 'f4': (A.ivalue+B.ivalue-C.ivalue)*D.ivalue]; return object;");
     condExpMVEL = MVEL.compileExpression("if(A.ikey=='true'){return A.ivalue;}else if(B.ikey=='true'){return B.ivalue;}else if(C.ikey=='true'){return C.ivalue;}else if(D.ikey=='true'){return D.ivalue;}else{return 0;}");
+    System.out.println("MVEL 准备工作就绪！");
+
+    ParserContext parserContext = new ParserContext();
+    parserContext.setStrongTyping(true);
+    parserContext.setStrictTypeEnforcement(true);
+    parserContext.addInput("A", Data.class);
+    parserContext.addInput("B", Data.class);
+    parserContext.addInput("C", Data.class);
+    parserContext.addInput("D", Data.class);
+    arithExpMVELStrongType = MVEL.compileExpression("(A.ivalue+B.ivalue-C.ivalue)*D.ivalue", parserContext);
+    objectExpMVELStrongType = MVEL.compileExpression("object = ['f1': A.ivalue, 'f2': A.ivalue+B.ivalue, 'f3': C.ivalue, 'f4': (A.ivalue+B.ivalue-C.ivalue)*D.ivalue]; return object;", parserContext);
+    condExpMVELStrongType = MVEL.compileExpression("if(A.ikey=='true'){return A.ivalue;}else if(B.ikey=='true'){return B.ivalue;}else if(C.ikey=='true'){return C.ivalue;}else if(D.ikey=='true'){return D.ivalue;}else{return 0;}", parserContext);
+    System.out.println("MVEL StrongType 模式准备工作就绪！");
   }
 
   public static void main(final String[] args) throws Exception {
