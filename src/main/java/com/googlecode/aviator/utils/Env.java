@@ -22,21 +22,24 @@
  */
 package com.googlecode.aviator.utils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import com.googlecode.aviator.AviatorEvaluatorInstance;
 import com.googlecode.aviator.Expression;
 import com.googlecode.aviator.Feature;
-import com.googlecode.aviator.Options;
-import com.googlecode.aviator.exception.ExpressionRuntimeException;
 import com.googlecode.aviator.runtime.function.FunctionUtils;
+import com.googlecode.aviator.runtime.function.internal.ReducerResult;
+import com.googlecode.aviator.runtime.type.AviatorNil;
 import com.googlecode.aviator.runtime.type.Range;
 
 /**
@@ -47,14 +50,16 @@ import com.googlecode.aviator.runtime.type.Range;
  * @param <String>
  * @param <Object>
  */
-public class Env implements Map<String, Object> {
+public class Env implements Map<String, Object>, Serializable {
+  private static final long serialVersionUID = -7793716992176999689L;
+
   /** Default values map. */
   private final Map<String, Object> mDefaults;
 
   /**
    * Current evaluator instance that executes current expression.
    */
-  private AviatorEvaluatorInstance instance;
+  private transient AviatorEvaluatorInstance instance;
 
   /** Override values map. */
   private Map<String, Object> mOverrides;
@@ -66,7 +71,7 @@ public class Env implements Map<String, Object> {
   private List<String> importedPackages;
 
   // Caching resolved classes
-  private Map<String/* class name */, Class<?>> resolvedClasses;
+  private transient Map<String/* class name */, Class<?>> resolvedClasses;
 
   public static final Map<String, Object> EMPTY_ENV = Collections.emptyMap();
 
@@ -199,32 +204,7 @@ public class Env implements Map<String, Object> {
       throw new ClassNotFoundException(name);
     }
     put2cache(name, clazz);
-    return checkIfClassIsAllowed(checkIfAllow, clazz);
-  }
-
-  private Class<?> checkIfClassIsAllowed(final boolean checkIfAllow, final Class<?> clazz) {
-    if (checkIfAllow) {
-      Set<Class<?>> allowedList = this.instance.getOptionValue(Options.ALLOWED_CLASS_SET).classes;
-      if (allowedList != null) {
-        // Null list means allowing all classes
-        if (!allowedList.contains(clazz)) {
-          throw new ExpressionRuntimeException(
-              "`" + clazz + "` is not in allowed class set, check Options.ALLOWED_CLASS_SET");
-        }
-      }
-      Set<Class<?>> assignableList =
-          this.instance.getOptionValue(Options.ASSIGNABLE_ALLOWED_CLASS_SET).classes;
-      if (assignableList != null) {
-        for (Class<?> aClass : assignableList) {
-          if (aClass.isAssignableFrom(clazz)) {
-            return clazz;
-          }
-        }
-        throw new ExpressionRuntimeException(
-            "`" + clazz + "` is not in allowed class set, check Options.ALLOWED_CLASS_SET");
-      }
-    }
-    return clazz;
+    return this.instance.checkIfClassIsAllowed(checkIfAllow, clazz);
   }
 
   private Class<?> resolveFromImportedPackages(final String name) {
@@ -318,6 +298,76 @@ public class Env implements Map<String, Object> {
     return ret;
   }
 
+  static class TargetObjectTask implements GetValueTask {
+
+    public TargetObjectTask(Object target) {
+      super();
+      this.target = target;
+    }
+
+    Object target;
+
+    @Override
+    public Object call(Env env) {
+      return target;
+    }
+
+  }
+
+  static interface GetValueTask {
+    Object call(Env env);
+  }
+
+  /**
+   * Internal variable tasks to get the value.
+   */
+  private static final IdentityHashMap<String, GetValueTask> INTERNAL_VARIABLES =
+      new IdentityHashMap<String, GetValueTask>();
+
+  static {
+    INTERNAL_VARIABLES.put(Constants.REDUCER_LOOP_VAR, new TargetObjectTask(Range.LOOP));
+    INTERNAL_VARIABLES.put(Constants.REDUCER_EMPTY_VAR,
+        new TargetObjectTask(ReducerResult.withEmpty(AviatorNil.NIL)));
+    INTERNAL_VARIABLES.put(Constants.ENV_VAR, new GetValueTask() {
+
+      @Override
+      public Object call(Env env) {
+        env.instance.ensureFeatureEnabled(Feature.InternalVars);
+        return env;
+      }
+
+    });
+    INTERNAL_VARIABLES.put(Constants.FUNC_ARGS_VAR, new GetValueTask() {
+
+      @Override
+      public Object call(Env env) {
+        env.instance.ensureFeatureEnabled(Feature.InternalVars);
+        return FunctionUtils.getFunctionArguments(env);
+      }
+
+    });
+    INTERNAL_VARIABLES.put(Constants.INSTANCE_VAR, new GetValueTask() {
+
+      @Override
+      public Object call(Env env) {
+        env.instance.ensureFeatureEnabled(Feature.InternalVars);
+        return env.instance;
+      }
+
+    });
+
+    INTERNAL_VARIABLES.put(Constants.EXP_VAR, new GetValueTask() {
+
+      @Override
+      public Object call(Env env) {
+        env.instance.ensureFeatureEnabled(Feature.InternalVars);
+        return env.expression;
+      }
+
+    });
+
+  }
+
   /**
    * Get value for key. If the key is present in the overrides map, the value from that map is
    * returned; otherwise, the value for the key in the defaults map is returned.
@@ -327,30 +377,9 @@ public class Env implements Map<String, Object> {
    */
   @Override
   public Object get(final Object key) {
-    // Should check ENV_VAR at first
-    // TODO: performance tweak
-    if (Constants.REDUCER_LOOP_VAR == key) {
-      return Range.LOOP;
-    }
-    if (Constants.REDUCER_EMPTY_VAR == key) {
-      return Constants.REDUCER_EMPTY;
-    }
-
-    if (Constants.ENV_VAR == key) {
-      this.instance.ensureFeatureEnabled(Feature.InternalVars);
-      return this;
-    }
-    if (Constants.FUNC_ARGS_VAR == key) {
-      this.instance.ensureFeatureEnabled(Feature.InternalVars);
-      return FunctionUtils.getFunctionArguments(this);
-    }
-    if (Constants.INSTANCE_VAR == key) {
-      this.instance.ensureFeatureEnabled(Feature.InternalVars);
-      return this.instance;
-    }
-    if (Constants.EXP_VAR == key) {
-      this.instance.ensureFeatureEnabled(Feature.InternalVars);
-      return this.expression;
+    GetValueTask task = INTERNAL_VARIABLES.get(key);
+    if (task != null) {
+      return task.call(this);
     }
 
     Map<String, Object> overrides = getmOverrides(true);

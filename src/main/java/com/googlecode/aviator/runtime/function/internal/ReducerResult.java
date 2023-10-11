@@ -4,6 +4,7 @@ import java.util.Map;
 import com.googlecode.aviator.runtime.type.AviatorObject;
 import com.googlecode.aviator.runtime.type.AviatorRuntimeJavaType;
 import com.googlecode.aviator.runtime.type.AviatorType;
+import com.googlecode.aviator.utils.Env;
 
 /**
  * ReducerResult in looping.
@@ -16,6 +17,10 @@ public class ReducerResult extends AviatorRuntimeJavaType {
   private static final long serialVersionUID = 8804868778622599851L;
   public final ReducerState state;
   public AviatorObject obj;
+
+  public boolean isEmptyState() {
+    return this.state == ReducerState.Empty;
+  }
 
   public static ReducerResult withEmpty(final AviatorObject obj) {
     return new ReducerResult(ReducerState.Empty, obj);
@@ -66,7 +71,12 @@ public class ReducerResult extends AviatorRuntimeJavaType {
 
   @Override
   public String toString() {
-    return this.obj.toString();
+    Object val = getValue(Env.EMPTY_ENV);
+    if (val != this) {
+      return "<Reducer, " + this.state.name() + ", " + val + ">";
+    } else {
+      return "<Reducer, " + this.state.name() + ", this>";
+    }
   }
 
   @Override
