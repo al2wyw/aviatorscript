@@ -36,13 +36,16 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Benchmark                                        Mode  Cnt      Score     Error   Units
- * PerfBenchmark.testArith                         thrpt    5  78020.709 ± 688.638  ops/ms
- * PerfBenchmark.testArithByAviator                thrpt    5   1815.243 ±  22.148  ops/ms
- * PerfBenchmark.testArithByAviatorInterpretMode   thrpt    5   1253.947 ±   7.408  ops/ms
- * PerfBenchmark.testArithByBeetl                  thrpt    5   3081.299 ±  36.599  ops/ms
- * PerfBenchmark.testArithByScript                 thrpt    5   6117.984 ± 237.483  ops/ms
- * PerfBenchmark.testArithBySpel                   thrpt    5  47795.557 ± 800.126  ops/ms
- * PerfBenchmark.testArithBySpelInterpretMode      thrpt    5    633.445 ±  46.634  ops/ms
+ * PerfBenchmark.testArith                        thrpt    5  103458.853 ± 2446.561  ops/ms
+ * PerfBenchmark.testArithByAviator               thrpt    5    2490.415 ±   57.684  ops/ms
+ * PerfBenchmark.testArithByAviatorInterpretMode  thrpt    5    1686.681 ±   14.926  ops/ms
+ * PerfBenchmark.testArithByBeetl                 thrpt    5    3904.690 ±  146.051  ops/ms
+ * PerfBenchmark.testArithByMVEL                  thrpt    5    5172.483 ±   39.956  ops/ms
+ * PerfBenchmark.testArithByMVELStrongType        thrpt    5    7277.194 ±  109.768  ops/ms
+ * PerfBenchmark.testArithByScript                thrpt    5    7727.575 ±  283.199  ops/ms
+ * PerfBenchmark.testArithBySpel                  thrpt    5   63783.590 ±  726.086  ops/ms
+ * PerfBenchmark.testArithBySpelInterpretMode     thrpt    5     836.949 ±   14.800  ops/ms
+ *
  * PerfBenchmark.testCond                          thrpt    5  65466.293 ± 622.039  ops/ms
  * PerfBenchmark.testCondByAviator                 thrpt    5   1216.847 ±  12.346  ops/ms
  * PerfBenchmark.testCondByAviatorInterpretMode    thrpt    5    584.566 ±   5.683  ops/ms
