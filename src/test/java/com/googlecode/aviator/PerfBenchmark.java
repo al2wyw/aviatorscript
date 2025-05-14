@@ -36,16 +36,13 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Benchmark                                        Mode  Cnt      Score     Error   Units
- * PerfBenchmark.testArith                        thrpt    5  103458.853 ± 2446.561  ops/ms
- * PerfBenchmark.testArithByAviator               thrpt    5    2490.415 ±   57.684  ops/ms
- * PerfBenchmark.testArithByAviatorInterpretMode  thrpt    5    1686.681 ±   14.926  ops/ms
- * PerfBenchmark.testArithByBeetl                 thrpt    5    3904.690 ±  146.051  ops/ms
- * PerfBenchmark.testArithByMVEL                  thrpt    5    5172.483 ±   39.956  ops/ms
- * PerfBenchmark.testArithByMVELStrongType        thrpt    5    7277.194 ±  109.768  ops/ms
- * PerfBenchmark.testArithByScript                thrpt    5    7727.575 ±  283.199  ops/ms
- * PerfBenchmark.testArithBySpel                  thrpt    5   63783.590 ±  726.086  ops/ms
- * PerfBenchmark.testArithBySpelInterpretMode     thrpt    5     836.949 ±   14.800  ops/ms
- *
+ * PerfBenchmark.testArith                         thrpt    5  78020.709 ± 688.638  ops/ms
+ * PerfBenchmark.testArithByAviator                thrpt    5   1815.243 ±  22.148  ops/ms
+ * PerfBenchmark.testArithByAviatorInterpretMode   thrpt    5   1253.947 ±   7.408  ops/ms
+ * PerfBenchmark.testArithByBeetl                  thrpt    5   3081.299 ±  36.599  ops/ms
+ * PerfBenchmark.testArithByScript                 thrpt    5   6117.984 ± 237.483  ops/ms
+ * PerfBenchmark.testArithBySpel                   thrpt    5  47795.557 ± 800.126  ops/ms
+ * PerfBenchmark.testArithBySpelInterpretMode      thrpt    5    633.445 ±  46.634  ops/ms
  * PerfBenchmark.testCond                          thrpt    5  65466.293 ± 622.039  ops/ms
  * PerfBenchmark.testCondByAviator                 thrpt    5   1216.847 ±  12.346  ops/ms
  * PerfBenchmark.testCondByAviatorInterpretMode    thrpt    5    584.566 ±   5.683  ops/ms
@@ -146,8 +143,46 @@ public class PerfBenchmark {
   }
 
   @Benchmark
+  public void testObject() throws Exception {
+    Map<String, Object> result = new HashMap<>(4);
+    result.put("f1", ((Data) this.paras.get("A")).getIvalue());
+    result.put("f2",
+        ((Data) this.paras.get("A")).getIvalue() + ((Data) this.paras.get("B")).getIvalue());
+    result.put("f3", ((Data) this.paras.get("C")).getIvalue());
+    result
+        .put("f4",
+            (((Data) this.paras.get("A")).getIvalue() + ((Data) this.paras.get("B")).getIvalue()
+                - ((Data) this.paras.get("C")).getIvalue())
+                * ((Data) this.paras.get("D")).getIvalue());
+  }
+
+  @Benchmark
+  public void testCond() throws Exception {
+    Object result = 0;
+    if (((Data) this.paras.get("A")).getIkey().equals("true")) {
+      result = ((Data) this.paras.get("A")).getIvalue();
+    } else if (((Data) this.paras.get("B")).getIkey().equals("true")) {
+      result = ((Data) this.paras.get("B")).getIvalue();
+    } else if (((Data) this.paras.get("C")).getIkey().equals("true")) {
+      result = ((Data) this.paras.get("C")).getIvalue();
+    } else if (((Data) this.paras.get("D")).getIkey().equals("true")) {
+      result = ((Data) this.paras.get("D")).getIvalue();
+    }
+  }
+
+  @Benchmark
   public void testArithByScript() throws Exception {
     Object result = this.arithInv.invokeFunction("testArith", this.paras);
+  }
+
+  @Benchmark
+  public void testObjectByScript() throws Exception {
+    Object result = this.objectInv.invokeFunction("testObject", this.paras);
+  }
+
+  @Benchmark
+  public void testCondByScript() throws Exception {
+    Object result = this.condInv.invokeFunction("testCond", this.paras);
   }
 
   @Benchmark
@@ -156,13 +191,48 @@ public class PerfBenchmark {
   }
 
   @Benchmark
+  public void testObjectByBeetl() {
+    Map result = this.gt.runScript(
+        "var object = {f1: A.ivalue, f2: A.ivalue+B.ivalue, f3: C.ivalue, f4: (A.ivalue+B.ivalue-C.ivalue)*D.ivalue}; ",
+        this.paras);
+  }
+
+  @Benchmark
+  public void testCondByBeetl() {
+    Map result = this.gt.runScript(
+        "if(A.ikey=='true'){return A.ivalue;}else if(B.ikey=='true'){return B.ivalue;}else if(C.ikey=='true'){return C.ivalue;}else if(D.ikey=='true'){return D.ivalue;}else{return 0;}",
+        this.paras);
+  }
+
+  @Benchmark
   public void testArithByAviatorInterpretMode() {
     Object result = this.arithExpInterpret.execute(this.paras);
   }
 
   @Benchmark
+  public void testObjectByAviatorInterpretMode() {
+    Object result = this.objectExpInterpret.execute(this.paras);
+  }
+
+  @Benchmark
+  public void testCondByAviatorInterpretMode() {
+    Object result = this.condExpInterpret.execute(this.paras);
+  }
+
+
+  @Benchmark
   public void testArithByAviator() {
     Object result = this.arithExp.execute(this.paras);
+  }
+
+  @Benchmark
+  public void testObjectByAviator() {
+    Object result = this.objectExp.execute(this.paras);
+  }
+
+  @Benchmark
+  public void testCondByAviator() {
+    Object result = this.condExp.execute(this.paras);
   }
 
   @Benchmark
@@ -181,8 +251,28 @@ public class PerfBenchmark {
   }
 
   @Benchmark
+  public void testObjectByMVEL() {
+    Object result = MVEL.executeExpression(this.objectExpMVEL, this.paras);
+  }
+
+  @Benchmark
+  public void testCondByMVEL() {
+    Object result = MVEL.executeExpression(this.condExpMVEL, this.paras);
+  }
+
+  @Benchmark
   public void testArithByMVELStrongType() {
     Object result = MVEL.executeExpression(this.arithExpMVELStrongType, this.paras);
+  }
+
+  @Benchmark
+  public void testObjectByMVELStrongType() {
+    Object result = MVEL.executeExpression(this.objectExpMVELStrongType, this.paras);
+  }
+
+  @Benchmark
+  public void testCondByMVELStrongType() {
+    Object result = MVEL.executeExpression(this.condExpMVELStrongType, this.paras);
   }
 
   private void initScript() {
