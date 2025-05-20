@@ -54,17 +54,20 @@ import org.springframework.util.StopWatch;
  * PerfBenchmark.testArithByScript                thrpt    5    7727.575 ±  283.199  ops/ms
  * PerfBenchmark.testArithBySpel                  thrpt    5   63783.590 ±  726.086  ops/ms
  * PerfBenchmark.testArithBySpelInterpretMode     thrpt    5     836.949 ±   14.800  ops/ms
- *
+ * PerfBenchmark.testArithByQL                    thrpt    5     441.561 ±   26.886  ops/ms
+ * 
  * PerfBenchmark.testCond                          thrpt    5  65466.293 ± 622.039  ops/ms
  * PerfBenchmark.testCondByAviator                 thrpt    5   1216.847 ±  12.346  ops/ms
  * PerfBenchmark.testCondByAviatorInterpretMode    thrpt    5    584.566 ±   5.683  ops/ms
  * PerfBenchmark.testCondByBeetl                   thrpt    5   2826.764 ±  26.029  ops/ms
  * PerfBenchmark.testCondByScript                  thrpt    5   6044.490 ±  36.924  ops/ms
+ * PerfBenchmark.testCondByQL                      thrpt    5    420.605 ±  38.177  ops/ms
  * PerfBenchmark.testObject                        thrpt    5   6635.216 ± 125.474  ops/ms
  * PerfBenchmark.testObjectByAviator               thrpt    5    843.353 ±  20.206  ops/ms
  * PerfBenchmark.testObjectByAviatorInterpretMode  thrpt    5    535.820 ±  10.644  ops/ms
  * PerfBenchmark.testObjectByBeetl                 thrpt    5   1844.948 ± 116.365  ops/ms
  * PerfBenchmark.testObjectByScript                thrpt    5   4228.086 ± 300.960  ops/ms
+ * PerfBenchmark.testObjectByQL                    thrpt    5    236.309 ±  69.323  ops/ms
  *
  * 2.6 GHz 六核Intel Core i7
  * */
