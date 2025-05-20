@@ -1,5 +1,13 @@
 package com.googlecode.aviator;
 
+import com.ql.util.express.ArraySwap;
+import com.ql.util.express.DefaultContext;
+import com.ql.util.express.ExpressLoader;
+import com.ql.util.express.ExpressRunner;
+import com.ql.util.express.InstructionSet;
+import com.ql.util.express.InstructionSetContext;
+import com.ql.util.express.OperateData;
+import com.ql.util.express.instruction.op.OperatorBase;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +41,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelCompiler;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.StopWatch;
 
 /**
  * Benchmark                                        Mode  Cnt      Score     Error   Units
@@ -123,6 +132,12 @@ public class PerfBenchmark {
   private Object objectExpMVELStrongType;
   private Object condExpMVELStrongType;
 
+  private ExpressRunner runner;
+  private DefaultContext<String, Object> dc;
+  private InstructionSet arithExpQL;
+  private InstructionSet objectExpQL;
+  private InstructionSet condExpQL;
+
   @Setup
   public void init() {
     this.paras.put("A", new Data("false", 23342423));
@@ -136,6 +151,7 @@ public class PerfBenchmark {
     initAviatorInterpreterMode();
     initSpel();
     initMVEL();
+    initQL();
   }
 
   @Benchmark
@@ -278,6 +294,22 @@ public class PerfBenchmark {
     Object result = MVEL.executeExpression(this.condExpMVELStrongType, this.paras);
   }
 
+  @Benchmark
+  public void testArithByQL() throws Exception {
+    Object result = runner.execute(arithExpQL, dc, null, false, false);
+  }
+
+  @Benchmark
+  public void testObjectByQL() throws Exception {
+    Object result = runner.execute(objectExpQL, dc, null, false, false);
+  }
+
+  @Benchmark
+  public void testCondByQL() throws Exception {
+    Object result = runner.execute(condExpQL, dc, null, false, false);
+  }
+
+
   private void initScript() {
     ScriptEngineManager manager = new ScriptEngineManager();
     try {
@@ -366,9 +398,36 @@ public class PerfBenchmark {
     System.out.println("MVEL StrongType 模式准备工作就绪！");
   }
 
+  private void initQL() {
+    runner = new ExpressRunner();
+    ExpressLoader loader = new ExpressLoader(runner);
+
+    dc = new DefaultContext<>();
+    dc.putAll(this.paras);
+
+    try {
+      arithExpQL = loader.parseInstructionSet("arithExpQL", "(A.ivalue+B.ivalue-C.ivalue)*D.ivalue");
+      objectExpQL = loader.parseInstructionSet("objectExpQL",
+              "abc = NewMap('f1': A.ivalue, 'f2': A.ivalue+B.ivalue, 'f3': C.ivalue, 'f4': (A.ivalue+B.ivalue-C.ivalue)*D.ivalue); return abc;");
+      condExpQL = loader.parseInstructionSet("condExpQL",
+              "if(A.ikey=='true'){return A.ivalue;}else if(B.ikey=='true'){return B.ivalue;}else if(C.ikey=='true'){return C.ivalue;}else if(D.ikey=='true'){return D.ivalue;}else{return 0;}");
+      System.out.println("QL Expression 模式准备工作就绪！");
+    } catch (Exception e) {
+       e.printStackTrace();
+    }
+  }
+
   public static void main(final String[] args) throws Exception {
     Options opt = new OptionsBuilder().include(PerfBenchmark.class.getSimpleName()).build();
     new Runner(opt).run();
   }
+  
+  public void testTimeoutQL() throws Exception {
+    ExpressRunner runner = new ExpressRunner();
+    Object ret = runner.execute("int i = 10; i = i + 100; java.lang.Thread.sleep(10000); return i;", null, null, false, false, 1000);
+    System.out.println(ret);
+  }
+
+
 
 }
