@@ -1,6 +1,6 @@
 # AviatorScript
 
-[![Build Status](https://travis-ci.org/killme2008/aviatorscript.svg?branch=master)](https://travis-ci.org/killme2008/aviatorscript)
+![Build Status](https://github.com/killme2008/aviatorscript/actions/workflows/maven.yml/badge.svg)
 [![Maven Central](https://img.shields.io/maven-central/v/com.googlecode.aviator/aviator.svg?label=maven%20central)](https://search.maven.org/search?q=g:com.googlecode.aviator%20AND%20aviator)
 
 [📖 English Documentation](README-EN.md) | 📖 中文文档
@@ -9,17 +9,20 @@
 
 `AviatorScript` 是一门高性能、轻量级寄宿于 JVM （包括 Android 平台）之上的脚本语言。
 
+**It's not a game, it's a programming language. Please refrain from sending me any more unsolicited emails.RTFM**
+
 # 特性介绍
 
 1. 支持数字、字符串、正则表达式、布尔值、正则表达式等[基本类型](https://www.yuque.com/boyan-avfmj/aviatorscript/lvabnw)，完整支持所有 Java 运算符及优先级等。
 2. [函数](https://www.yuque.com/boyan-avfmj/aviatorscript/gl2p0q)是一等公民，支持[闭包和函数式编程](https://www.yuque.com/boyan-avfmj/aviatorscript/ksghfc)。
-2. 内置 [bigint](https://www.yuque.com/boyan-avfmj/aviatorscript/lvabnw#a0Ifn)/[decimal](https://www.yuque.com/boyan-avfmj/aviatorscript/lvabnw#QbV7z) 类型用于大整数和高精度运算，支持[运算符重载](https://www.yuque.com/boyan-avfmj/aviatorscript/ydllav#5hq4k)得以让这些类型使用普通的算术运算符 `+-*/ `参与运算。
-3. 完整的脚本语法支持，包括多行数据、条件语句、循环语句、词法作用域和异常处理等。
-4. [函数式编程](https://www.yuque.com/boyan-avfmj/aviatorscript/ksghfc)结合 [Sequence 抽象](https://www.yuque.com/boyan-avfmj/aviatorscript/yc4l93)，便捷处理任何集合。
-5. 轻量化的[模块系统](https://www.yuque.com/boyan-avfmj/aviatorscript/rqra81)。
-6. 多种方式，方便地[调用 Java 方法](https://www.yuque.com/boyan-avfmj/aviatorscript/xbdgg2)，完整支持 Java [脚本 API](https://www.yuque.com/boyan-avfmj/aviatorscript/bds23b)（方便从 Java 调用脚本）。
-7. 丰富的定制选项，可作为安全的语言沙箱和全功能语言使用。
-8. 轻量化，高性能，ASM 模式下通过直接将脚本翻译成 JVM 字节码，[解释模式](https://www.yuque.com/boyan-avfmj/aviatorscript/ok8agx)可运行于 Android 等非标 Java 平台。
+3. 内置 [bigint](https://www.yuque.com/boyan-avfmj/aviatorscript/lvabnw#a0Ifn)/[decimal](https://www.yuque.com/boyan-avfmj/aviatorscript/lvabnw#QbV7z) 类型用于大整数和高精度运算，支持[运算符重载](https://www.yuque.com/boyan-avfmj/aviatorscript/ydllav#5hq4k)得以让这些类型使用普通的算术运算符 `+-*/ `参与运算。
+4. 完整的脚本语法支持，包括多行数据、条件语句、循环语句、词法作用域和异常处理等。
+5. [函数式编程](https://www.yuque.com/boyan-avfmj/aviatorscript/ksghfc)结合 [Sequence 抽象](https://www.yuque.com/boyan-avfmj/aviatorscript/yc4l93)，便捷处理任何集合。
+6. 轻量化的[模块系统](https://www.yuque.com/boyan-avfmj/aviatorscript/rqra81)。
+7. 多种方式，方便地[调用 Java 方法](https://www.yuque.com/boyan-avfmj/aviatorscript/xbdgg2)，完整支持 Java [脚本 API](https://www.yuque.com/boyan-avfmj/aviatorscript/bds23b)（方便从 Java 调用脚本）。
+8. 丰富的[定制选项](https://www.yuque.com/boyan-avfmj/aviatorscript/yr1oau)，可作为安全的语言沙箱和全功能语言使用。
+9. 动态编译和执行、轻量化、高性能，ASM 模式下通过直接将脚本编译成 JVM 字节码，[解释模式](https://www.yuque.com/boyan-avfmj/aviatorscript/ok8agx)可运行于 Android 等非标 Java 平台。
+10. 支持[编译结果序列化](https://github.com/killme2008/aviatorscript/blob/master/src/test/java/com/googlecode/aviator/example/SerializeExample.java)，方便缓存加速等。支持[执行超时设置](https://github.com/killme2008/aviatorscript/blob/master/src/test/java/com/googlecode/aviator/example/TimeoutExample.java)，避免破坏性脚本耗尽资源。
 
 使用场景包括：
 1. 规则判断及规则引擎
@@ -32,9 +35,9 @@
 
 # News
 
-* [5.3.3](https://github.com/killme2008/aviatorscript/releases/tag/aviator-5.3.3)，修复潜在内存泄露、变量捕获错误等 Bug。
-* [5.3.2](https://github.com/killme2008/aviatorscript/releases/tag/aviator-5.3.2)，一些 Bug 修复，推荐升级。
-* [5.3.1](https://github.com/killme2008/aviatorscript/releases/tag/aviator-5.3.1)，逻辑运算符支持别名和 bug 修复等。
+* [5.4.3](https://github.com/killme2008/aviatorscript/releases/tag/aviator-5.4.3)，增加安全沙箱一键启用方法以及修复 bug 等。
+* [5.4.2](https://github.com/killme2008/aviatorscript/releases/tag/aviator-5.4.2)，增加 `getFunctionNames` 方法用于获取函数列表以及设置求值超时时间等。
+* [5.4.1](https://github.com/killme2008/aviatorscript/releases/tag/aviator-5.4.1)，修复递归函数无法工作的 bug，修复函数无法序列化的 bug 等。
 
 # Dependency
 

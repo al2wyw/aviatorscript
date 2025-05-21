@@ -11,6 +11,7 @@ import com.googlecode.aviator.utils.Env;
 
 public class SendIR implements IR {
 
+  private static final long serialVersionUID = 2747763526113139010L;
   private final String name;
   private final int arity;
   private final boolean unpackArgs;
@@ -135,6 +136,11 @@ public class SendIR implements IR {
     }
     context.push(callFn(fn, args, this.arity, context.getEnv()));
     context.dispatch();
+  }
+
+  @Override
+  public boolean mayBeCost() {
+    return true;
   }
 
   @Override
