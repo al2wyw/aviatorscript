@@ -722,6 +722,12 @@ public class ASMCodeGenerator extends BaseEvalCodeGenerator {
 
     byte[] bytes = this.classWriter.toByteArray();
     try {
+
+      String path = this.classLoader.getResource("./").getPath();
+      java.io.FileOutputStream fout = new java.io.FileOutputStream(path + "/" + this.className + ".class");
+      fout.write(bytes);
+      fout.close();
+
       boolean enableSerializable = this.instance.getOptionValue(Options.SERIALIZABLE).bool;
       Class<?> defineClass = ClassDefiner.defineClass(this.className, Expression.class, bytes,
           this.classLoader, enableSerializable);
