@@ -54,7 +54,6 @@ public class ReducerFunction extends AbstractFunction {
     long c = 0;
 
     if (coll != Range.LOOP) {
-
       long arities = (long) arg2.meta(Constants.ARITIES_META);
       long index = 0;
       boolean unboxEntry =
@@ -130,12 +129,12 @@ public class ReducerFunction extends AbstractFunction {
     }
 
     Object contObj = arg3.getValue(env);
-    if (contObj == Constants.REDUCER_EMPTY) {
+    if ((contObj instanceof ReducerResult) && ((ReducerResult) contObj).isEmptyState()) {
       return result;
     }
 
     AviatorObject contResult = ((AviatorFunction) contObj).call(env);
-    if (contResult == Constants.REDUCER_EMPTY) {
+    if ((contResult instanceof ReducerResult) && ((ReducerResult) contResult).isEmptyState()) {
       // empty continuation, return current result.
       return result;
     } else {

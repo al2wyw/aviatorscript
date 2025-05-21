@@ -138,6 +138,9 @@ public class InterpretContext {
     }
 
     if (this.pc != null) {
+      if (this.pc.mayBeCost()) {
+        RuntimeUtils.checkExecutionTimedOut(env);
+      }
       if (this.trace) {
         RuntimeUtils.printlnTrace(this.env, "    " + this.pc + "    " + descOperandsStack());
       }

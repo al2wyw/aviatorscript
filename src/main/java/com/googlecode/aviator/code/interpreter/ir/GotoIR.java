@@ -4,6 +4,7 @@ import com.googlecode.aviator.code.interpreter.IR;
 import com.googlecode.aviator.code.interpreter.InterpretContext;
 
 public class GotoIR implements IR, JumpIR {
+  private static final long serialVersionUID = 5095135626036497287L;
   private int pc;
   private final Label label;
   private final SourceInfo sourceInfo;
@@ -27,6 +28,11 @@ public class GotoIR implements IR, JumpIR {
   @Override
   public Label getLabel() {
     return this.label;
+  }
+
+  @Override
+  public boolean mayBeCost() {
+    return true;
   }
 
   @Override
