@@ -424,8 +424,16 @@ public class PerfBenchmark {
     Options opt = new OptionsBuilder().include(PerfBenchmark.class.getSimpleName()).build();
     new Runner(opt).run();
   }
+
+  public static void profile() throws Exception {
+    PerfBenchmark benchmark = new PerfBenchmark();
+    benchmark.init();
+    for (int i = 0; i < 999999900; i++) {
+      benchmark.testArithByQL();
+    }
+  }
   
-  public void testTimeoutQL() throws Exception {
+  public static void testTimeoutQL() throws Exception {
     ExpressRunner runner = new ExpressRunner();
     Object ret = runner.execute("int i = 10; i = i + 100; java.lang.Thread.sleep(10000); return i;", null, null, false, false, 1000);
     System.out.println(ret);
