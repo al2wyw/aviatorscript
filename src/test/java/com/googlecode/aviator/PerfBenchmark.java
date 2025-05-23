@@ -1,13 +1,9 @@
 package com.googlecode.aviator;
 
-import com.ql.util.express.ArraySwap;
 import com.ql.util.express.DefaultContext;
 import com.ql.util.express.ExpressLoader;
 import com.ql.util.express.ExpressRunner;
 import com.ql.util.express.InstructionSet;
-import com.ql.util.express.InstructionSetContext;
-import com.ql.util.express.OperateData;
-import com.ql.util.express.instruction.op.OperatorBase;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +37,6 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelCompiler;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.util.StopWatch;
 
 /**
  * Benchmark                                        Mode  Cnt      Score     Error   Units
@@ -71,8 +66,8 @@ import org.springframework.util.StopWatch;
  *
  * 2.6 GHz 六核Intel Core i7
  * */
-@Warmup(iterations = 5, time = 10, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 10, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 3, time = 10, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 3, time = 10, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -158,14 +153,14 @@ public class PerfBenchmark {
   }
 
   @Benchmark
-  public void testArith() throws Exception {
-    Object result =
+  public Object testArith() throws Exception {
+    return
         (((Data) this.paras.get("A")).getIvalue() + ((Data) this.paras.get("B")).getIvalue()
             - ((Data) this.paras.get("C")).getIvalue()) * ((Data) this.paras.get("D")).getIvalue();
   }
 
   @Benchmark
-  public void testObject() throws Exception {
+  public Object testObject() throws Exception {
     Map<String, Object> result = new HashMap<>(4);
     result.put("f1", ((Data) this.paras.get("A")).getIvalue());
     result.put("f2",
@@ -176,10 +171,11 @@ public class PerfBenchmark {
             (((Data) this.paras.get("A")).getIvalue() + ((Data) this.paras.get("B")).getIvalue()
                 - ((Data) this.paras.get("C")).getIvalue())
                 * ((Data) this.paras.get("D")).getIvalue());
+    return result;
   }
 
   @Benchmark
-  public void testCond() throws Exception {
+  public Object testCond() throws Exception {
     Object result = 0;
     if (((Data) this.paras.get("A")).getIkey().equals("true")) {
       result = ((Data) this.paras.get("A")).getIvalue();
@@ -190,6 +186,7 @@ public class PerfBenchmark {
     } else if (((Data) this.paras.get("D")).getIkey().equals("true")) {
       result = ((Data) this.paras.get("D")).getIvalue();
     }
+    return result;
   }
 
   @Benchmark
