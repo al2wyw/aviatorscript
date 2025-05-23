@@ -382,6 +382,7 @@ public class PerfBenchmark {
   }
 
   //-Dmvel2.advanced_debugging=true -Dmvel2.disable.jit=true
+  // asm accessor 没有比 reflect accessor 快多少, 快10%左右
   private void initMVEL() {
     arithExpMVEL = MVEL.compileExpression("(A.ivalue+B.ivalue-C.ivalue)*D.ivalue");
     objectExpMVEL = MVEL.compileExpression("object = ['f1': A.ivalue, 'f2': A.ivalue+B.ivalue, 'f3': C.ivalue, 'f4': (A.ivalue+B.ivalue-C.ivalue)*D.ivalue]; return object;");
